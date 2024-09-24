@@ -164,12 +164,12 @@ const useStyles = makeStyles((theme) => ({
     // color: theme.barraSuperior.secondary.main,
   },
   logo: {
-    width: "80%",
+    width: "70%",
     height: "auto",
     maxWidth: 180,
     [theme.breakpoints.down("sm")]: {
       width: "auto",
-      height: "80%",
+      height: "70%",
       maxWidth: 180,
     },
     logo: theme.logo
