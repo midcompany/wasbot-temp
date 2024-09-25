@@ -119,7 +119,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
     const numberToTest = messageData.number;
     const body = messageData.body;
-
+    console.log(whatsappId, messageData, 'FIRST ====')
     const companyId = whatsapp.companyId;
 
     const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
@@ -136,9 +136,13 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
       companyId
     };
 
+    console.log(contactData, 'SECOND ====')
+
+
     const contact = await CreateOrUpdateContactService(contactData);
 
     const ticket = await FindOrCreateTicketService(contact, whatsapp.id!, 0, companyId);
+    console.log(ticket,  contact, 'THIRD ====')
 
     if (medias) {
       await Promise.all(
@@ -176,7 +180,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         });
       }, 1000);
     }
-    
+
     SetTicketMessagesAsRead(ticket);
 
     return res.send({ mensagem: "Mensagem enviada" });
