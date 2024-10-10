@@ -20,6 +20,7 @@ import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService";
+import { createCache, getCacheItem } from "../middleware/cacheMid";
 type IndexQuery = {
   pageNumber: string;
 };
@@ -38,7 +39,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { pageNumber } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
   const queues: number[] = [];
-
+  const key = req.originalUrl || req.url;
   if (profile !== "admin") {
     const user = await User.findByPk(req.user.id, {
       include: [{ model: Queue, as: "queues" }]
@@ -54,8 +55,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     companyId,
     queues
   });
-
   SetTicketMessagesAsRead(ticket);
+  await createCache(key, { count, messages, ticket, hasMore })
 
   return res.json({ count, messages, ticket, hasMore });
 };

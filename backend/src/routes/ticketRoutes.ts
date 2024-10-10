@@ -2,6 +2,7 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import * as TicketController from "../controllers/TicketController";
+import { cacheMiddleware } from "../middleware/cacheMid";
 
 const ticketRoutes = express.Router();
 

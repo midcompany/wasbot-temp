@@ -56,6 +56,7 @@ import {
 import typebotListener from "../TypebotServices/typebotListener";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import ShowQueueIntegrationService from "../QueueIntegrationServices/ShowQueueIntegrationService";
+import { removeCachePattern, updateCacheWithNewMessage } from "../../middleware/cacheMid";
 
 const request = require("request");
 
@@ -843,7 +844,7 @@ const verifyMediaMessage = async (
   }
 
   const body = getBodyMessage(msg);
-  
+
 
   const messageData = {
     id: msg.key.id,
@@ -926,12 +927,13 @@ export const verifyMessage = async (
     dataJson: JSON.stringify(msg),
 	isEdited: isEdited,
   };
-
+  // await removeCachePattern(`/messages/${ticket.id}?pageNumber=*`)
   await ticket.update({
     lastMessage: body
   });
 
-  await CreateMessageService({ messageData, companyId: ticket.companyId });
+  const message = await CreateMessageService({ messageData, companyId: ticket.companyId });
+  await updateCacheWithNewMessage(`/messages/${ticket.id}?pageNumber=1`, message)
 
   if (!msg.key.fromMe && ticket.status === "closed") {
     await ticket.update({ status: "pending" });
@@ -1830,7 +1832,7 @@ const handleMessage = async (
       console.log(e);
     }
 
-    // Atualiza o ticket se a ultima mensagem foi enviada por mim, para que possa ser finalizado. 
+    // Atualiza o ticket se a ultima mensagem foi enviada por mim, para que possa ser finalizado.
     try {
       await ticket.update({
         fromMe: msg.key.fromMe,
@@ -2003,7 +2005,7 @@ const handleMessage = async (
       !ticket.isGroup &&
       !ticket.userId &&
       ticket.integrationId &&
-      ticket.useIntegration && 
+      ticket.useIntegration &&
       ticket.queue
     ) {
 
@@ -2170,7 +2172,19 @@ const handleMsgAck = async (
     });
 
     if (!messageToUpdate) return;
-    await messageToUpdate.update({ ack: chat });
+    const message = await messageToUpdate.update({ ack: chat });
+    const messageToUpdated = await Message.findByPk(msg.key.id, {
+      include: [
+        "contact",
+        {
+          model: Message,
+          as: "quotedMsg",
+          include: ["contact"],
+        },
+      ],
+    });
+
+    await updateCacheWithNewMessage(`/messages/${message.ticketId}?pageNumber=1`, messageToUpdated)
     io.to(messageToUpdate.ticketId.toString()).emit(
       `company-${messageToUpdate.companyId}-appMessage`,
       {
@@ -2276,7 +2290,6 @@ const wbotMessageListener = async (wbot: Session, companyId: number): Promise<vo
         .map(msg => msg);
 
       if (!messages) return;
-
       messages.forEach(async (message: proto.IWebMessageInfo) => {
 
         const messageExists = await Message.count({
