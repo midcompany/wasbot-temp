@@ -1,11 +1,7 @@
 import { createClient } from 'redis';
+import { REDIS_URI_CONNECTION } from '../config/redis';
 
-const redisClient = createClient({
-  socket: {
-    host: 'localhost',
-    port: 7000,
-  }
-});
+const redisClient = createClient({ url: REDIS_URI_CONNECTION });
 
 redisClient.connect().catch((err) => {
   console.error('Erro ao conectar ao Redis:', err);

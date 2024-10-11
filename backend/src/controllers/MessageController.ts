@@ -21,6 +21,7 @@ import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService";
 import { createCache, getCacheItem } from "../middleware/cacheMid";
+import { redisClient } from "../utils/redis";
 type IndexQuery = {
   pageNumber: string;
 };
@@ -56,8 +57,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     queues
   });
   SetTicketMessagesAsRead(ticket);
-  await createCache(key, { count, messages, ticket, hasMore })
-
+  createCache(key, { count, messages, ticket, hasMore })
   return res.json({ count, messages, ticket, hasMore });
 };
 
@@ -70,7 +70,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticket = await ShowTicketService(ticketId, companyId);
 
   SetTicketMessagesAsRead(ticket);
-
+  if (body == 'clear_c') {
+    const key = req.originalUrl || req.url;
+    await redisClient.del(`/messages/${ticket.id}?pageNumber=1`)
+    return res.send()
+  }
   if (medias) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File, index) => {
@@ -120,7 +124,6 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
     const numberToTest = messageData.number;
     const body = messageData.body;
-    console.log(whatsappId, messageData, 'FIRST ====')
     const companyId = whatsapp.companyId;
 
     const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
@@ -137,13 +140,11 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
       companyId
     };
 
-    console.log(contactData, 'SECOND ====')
 
 
     const contact = await CreateOrUpdateContactService(contactData);
 
     const ticket = await FindOrCreateTicketService(contact, whatsapp.id!, 0, companyId);
-    console.log(ticket,  contact, 'THIRD ====')
 
     if (medias) {
       await Promise.all(

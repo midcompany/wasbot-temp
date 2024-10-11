@@ -9,21 +9,11 @@ const cacheMiddleware = async (
   const key = req.originalUrl || req.url;
   try {
     const cachedData = await redisClient.get(key);
-
     if (cachedData) {
       console.log('cache hit', key)
       res.send(JSON.parse(cachedData));
       return;
     }
-
-    const originalSend = res.send.bind(res);
-    res.send = (body: any): Response => {
-      originalSend(body);
-      redisClient.set(key, body, { EX: 3600 }).catch(err => {
-        console.error("Erro ao salvar no cache Redis:", err);
-      });
-      return res;
-    };
 
     next();
   } catch (err) {
@@ -61,18 +51,22 @@ const clearCache = async (
 };
 
 const updateCache = async (key: string, item: any) => {
-  let cachedData = await redisClient.get(key);
+  try {
+    let cachedData = await redisClient.get(key);
 
-  if (cachedData) {
-    const cacheArray = JSON.parse(cachedData);
-    if (Array.isArray(cacheArray)) {
-      cacheArray.push(item);
-    } else {
-      console.warn("O cache não é um array.");
+    if (cachedData) {
+      const cacheArray = JSON.parse(cachedData);
+      if (Array.isArray(cacheArray)) {
+        cacheArray.push(item);
+      } else {
+        console.warn("O cache não é um array.");
+      }
+
+      await redisClient.set(key, JSON.stringify(cacheArray), { EX: 3600 * 8 });
+      console.log(`Item adicionado ao cache para ${key}`);
     }
-
-    await redisClient.set(key, JSON.stringify(cacheArray), { EX: 3600 * 8 });
-    console.log(`Item adicionado ao cache para ${key}`);
+  } catch(e) {
+    await redisClient.del(key);
   }
 };
 
@@ -106,9 +100,8 @@ const updateCacheWithNewMessage = async (key: string, newMessage: any) => {
       data['messages'][mIndex] = newMessage
     } else {
       data['messages'].push(newMessage);
-      data['count'] = data['count'] + 1;
     }
-    if (data['count'] > 20)
+    if (data['messages'].length > 20)
       messages.shift();
 
     await createCache(key, data);

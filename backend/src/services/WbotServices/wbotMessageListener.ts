@@ -871,6 +871,9 @@ const verifyMediaMessage = async (
     companyId: ticket.companyId,
   });
 
+  await updateCacheWithNewMessage(`/messages/${ticket.id}?pageNumber=1`, newMessage)
+
+
   if (!msg.key.fromMe && ticket.status === "closed") {
     await ticket.update({ status: "pending" });
     await ticket.reload({
