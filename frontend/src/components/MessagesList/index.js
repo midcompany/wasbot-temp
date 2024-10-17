@@ -335,31 +335,31 @@ const MessagesList = ({ ticket, ticketId, isGroup }) => {
 
     currentTicketId.current = ticketId;
   }, [ticketId]);
+  const fetchMessages = async (hasCache = false) => {
+    if (ticketId === undefined) return;
+    const url = !hasCache ? `/messages/${ticketId}` : `/messages/${ticketId}?hasCache=1`
+    try {
+      const { data } = await api.get(url, {
+        params: { pageNumber },
+      });
+
+      if (currentTicketId.current === ticketId) {
+        dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
+        setHasMore(data.hasMore);
+        setLoading(false);
+      }
+
+      if (pageNumber === 1 && data.messages.length > 1) {
+        scrollToBottom();
+      }
+    } catch (err) {
+      setLoading(false);
+      toastError(err);
+    }
+  };
 
   useEffect(() => {
-    setLoading(true);
     const delayDebounceFn = setTimeout(() => {
-      const fetchMessages = async () => {
-        if (ticketId === undefined) return;
-        try {
-          const { data } = await api.get("/messages/" + ticketId, {
-            params: { pageNumber },
-          });
-
-          if (currentTicketId.current === ticketId) {
-            dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
-            setHasMore(data.hasMore);
-            setLoading(false);
-          }
-
-          if (pageNumber === 1 && data.messages.length > 1) {
-            scrollToBottom();
-          }
-        } catch (err) {
-          setLoading(false);
-          toastError(err);
-        }
-      };
       fetchMessages();
     }, 500);
     return () => {
