@@ -57,7 +57,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     queues
   });
   SetTicketMessagesAsRead(ticket);
-  if (key.includes('pageNumber=1')) {
+  if (key.split('=').at(-1) == '1') {
     createCache(`/messages/${ticket.id}?pageNumber=1`, { count, messages, ticket, hasMore })
   }
   return res.json({ count, messages, ticket, hasMore });
