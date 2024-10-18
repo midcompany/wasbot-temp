@@ -17,6 +17,7 @@ import SimpleListService, {
   SearchContactParams
 } from "../services/ContactServices/SimpleListService";
 import ContactCustomField from "../models/ContactCustomField";
+import { createCache } from "../middleware/cacheMid";
 
 type IndexQuery = {
   searchParam: string;
@@ -116,7 +117,9 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
 
   const contact = await ShowContactService(contactId, companyId);
-
+  if (contactId) {
+    createCache(contactId, contact)
+  }
   return res.status(200).json(contact);
 };
 

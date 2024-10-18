@@ -1,4 +1,5 @@
 import AppError from "../../errors/AppError";
+import { createCache } from "../../middleware/cacheMid";
 import Contact from "../../models/Contact";
 import ContactCustomField from "../../models/ContactCustomField";
 
@@ -69,7 +70,7 @@ const UpdateContactService = async ({
     attributes: ["id", "name", "number", "email", "profilePicUrl"],
     include: ["extraInfo"]
   });
-
+  createCache(contactId, contact)
   return contact;
 };
 
