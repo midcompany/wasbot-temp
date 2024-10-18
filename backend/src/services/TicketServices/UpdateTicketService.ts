@@ -289,7 +289,7 @@ const UpdateTicketService = async ({
         ticket
       });
     // update cache
-    createCache(ticketId.toString(), ticket)
+    createCache(ticket.uuid, ticket)
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
     Sentry.captureException(err);

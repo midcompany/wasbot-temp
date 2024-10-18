@@ -27,11 +27,11 @@ const cacheMiddlewareId = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
-  const { ticketId } = req.params;
+  const { uuid } = req.params;
   try {
-    const cachedData = await redisClient.get(ticketId.toString());
+    const cachedData = await redisClient.get(uuid);
     if (cachedData) {
-      console.log('cache hit', ticketId)
+      console.log('cache hit', uuid)
       res.send(JSON.parse(cachedData));
       return;
     }

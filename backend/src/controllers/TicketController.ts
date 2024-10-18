@@ -181,7 +181,9 @@ export const showFromUUID = async (
   const { uuid } = req.params;
 
   const ticket: Ticket = await ShowTicketUUIDService(uuid);
-
+  if (uuid) {
+    createCache(uuid, ticket)
+  }
   return res.status(200).json(ticket);
 };
 
