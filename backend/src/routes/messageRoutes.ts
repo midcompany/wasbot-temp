@@ -6,6 +6,7 @@ import tokenAuth from "../middleware/tokenAuth";
 
 import * as MessageController from "../controllers/MessageController";
 import { cacheMiddleware } from "../middleware/cacheMid";
+import { redisClient } from "../utils/redis";
 
 const messageRoutes = Router();
 
@@ -15,5 +16,6 @@ messageRoutes.get("/messages/:ticketId", isAuth, cacheMiddleware, MessageControl
 messageRoutes.post("/messages/:ticketId", isAuth, upload.array("medias"), MessageController.store);
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 messageRoutes.post("/api/messages/send", tokenAuth, upload.array("medias"), MessageController.send);
+messageRoutes.get("/messages/del", async (req, res) => { await redisClient.del('*'); return res.send() });
 
 export default messageRoutes;
