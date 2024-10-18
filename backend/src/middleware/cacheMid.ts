@@ -73,7 +73,7 @@ const updateCache = async (key: string, item: any) => {
 const createCache = async (key: string, msgs: any): Promise<any> => {
   try {
     const newCacheArray = msgs;
-    await redisClient.set(key, JSON.stringify(newCacheArray), { EX: 3600 * 8 });
+    await redisClient.set(key, JSON.stringify(newCacheArray), { EX: 3600 * 48 });
     return newCacheArray;
   } catch {}
 };

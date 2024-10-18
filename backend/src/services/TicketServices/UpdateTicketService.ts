@@ -18,6 +18,7 @@ import { isNil } from "lodash";
 import Whatsapp from "../../models/Whatsapp";
 import { Op } from "sequelize";
 import AppError from "../../errors/AppError";
+import { createCache } from "../../middleware/cacheMid";
 
 interface TicketData {
   status?: string;
@@ -230,7 +231,7 @@ const UpdateTicketService = async ({
                 }
               );
               await verifyMessage(queueChangedMessage, ticket, ticket.contact);
-            }      
+            }
     }
 
     await ticket.update({
@@ -287,7 +288,8 @@ const UpdateTicketService = async ({
         action: "update",
         ticket
       });
-
+    // update cache
+    createCache(ticketId.toString(), ticket)
     return { ticket, oldStatus, oldUserId };
   } catch (err) {
     Sentry.captureException(err);
