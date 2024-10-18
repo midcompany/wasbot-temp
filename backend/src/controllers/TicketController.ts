@@ -9,6 +9,7 @@ import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUID
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
+import { createCache } from "../middleware/cacheMid";
 
 type IndexQuery = {
   searchParam: string;
@@ -164,7 +165,12 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   const { companyId } = req.user;
 
+
   const contact = await ShowTicketService(ticketId, companyId);
+  if (ticketId) {
+    createCache(ticketId.toString(), contact)
+  }
+
   return res.status(200).json(contact);
 };
 
