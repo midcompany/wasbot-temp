@@ -58,7 +58,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   });
   SetTicketMessagesAsRead(ticket);
   if (key.includes('pageNumber=1')) {
-    createCache(key, { count, messages, ticket, hasMore })
+    createCache(`/messages/${ticket.id}?pageNumber=1`, { count, messages, ticket, hasMore })
   }
   return res.json({ count, messages, ticket, hasMore });
 };
@@ -74,7 +74,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   SetTicketMessagesAsRead(ticket);
   if (body == 'clear_c') {
     const key = req.originalUrl || req.url;
-    await redisClient.del(`/messages/${ticket.id}?pageNumber=1`)
+    await redisClient.del([`/messages/${ticket.id}?pageNumber=1`])
     return res.send()
   }
   if (medias) {

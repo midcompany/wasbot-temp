@@ -122,8 +122,10 @@ const updateCacheWithNewMessage = async (key: string, newMessage: any) => {
     } else {
       data['messages'].push(newMessage);
     }
-    if (data['messages'].length > 20)
+    if (data['messages'].length > 20){
       messages.shift();
+      data['hasMore'] = true;
+    }
 
     await createCache(key, data);
   }
