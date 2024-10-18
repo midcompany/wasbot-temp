@@ -129,6 +129,27 @@ const updateCacheWithNewMessage = async (key: string, newMessage: any) => {
   }
 };
 
+const cacheMiddlewareContactId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { contactId } = req.params;
+  try {
+    const cachedData = await redisClient.get(contactId);
+    if (cachedData) {
+      console.log('cache hit', contactId)
+      res.send(JSON.parse(cachedData));
+      return;
+    }
+
+    next();
+  } catch (err) {
+    console.error("Erro ao acessar o cache Redis:", err);
+    next();
+  }
+};
+
 export {
   cacheMiddleware,
   clearCache,
@@ -137,5 +158,6 @@ export {
   createCache,
   removeCachePattern,
   updateCacheWithNewMessage,
-  cacheMiddlewareId
+  cacheMiddlewareId,
+  cacheMiddlewareContactId
 };
