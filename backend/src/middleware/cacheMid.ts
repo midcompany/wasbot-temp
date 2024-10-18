@@ -22,6 +22,27 @@ const cacheMiddleware = async (
   }
 };
 
+const cacheMiddlewareId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { ticketId } = req.params;
+  try {
+    const cachedData = await redisClient.get(ticketId.toString());
+    if (cachedData) {
+      console.log('cache hit', ticketId)
+      res.send(JSON.parse(cachedData));
+      return;
+    }
+
+    next();
+  } catch (err) {
+    console.error("Erro ao acessar o cache Redis:", err);
+    next();
+  }
+};
+
 const getCacheItem = async (key: string) => {
   try {
     const cachedData = await redisClient.get(key);
@@ -115,5 +136,6 @@ export {
   getCacheItem,
   createCache,
   removeCachePattern,
-  updateCacheWithNewMessage
+  updateCacheWithNewMessage,
+  cacheMiddlewareId
 };
