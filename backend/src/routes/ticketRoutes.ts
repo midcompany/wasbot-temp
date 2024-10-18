@@ -2,13 +2,13 @@ import express from "express";
 import isAuth from "../middleware/isAuth";
 
 import * as TicketController from "../controllers/TicketController";
-import { cacheMiddleware } from "../middleware/cacheMid";
+import { cacheMiddleware, cacheMiddlewareId } from "../middleware/cacheMid";
 
 const ticketRoutes = express.Router();
 
 ticketRoutes.get("/tickets", isAuth, TicketController.index);
 
-ticketRoutes.get("/tickets/:ticketId", isAuth, cacheMiddleware, TicketController.show);
+ticketRoutes.get("/tickets/:ticketId", isAuth, cacheMiddlewareId, TicketController.show);
 
 ticketRoutes.get("/ticket/kanban", isAuth, TicketController.kanban);
 

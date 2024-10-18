@@ -136,5 +136,6 @@ export {
   getCacheItem,
   createCache,
   removeCachePattern,
-  updateCacheWithNewMessage
+  updateCacheWithNewMessage,
+  cacheMiddlewareId
 };
