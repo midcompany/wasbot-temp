@@ -34,7 +34,7 @@ type MessageData = {
   closeTicket?: true;
 };
 
-export const index = async (req: Request, res: Response): Promise<Response> => {
+export const indexMongo = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   const { pageNumber } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
@@ -50,6 +50,33 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }
 
   const { count, messages, ticket, hasMore } = await ListMessagesServiceMongo({
+    pageNumber,
+    ticketId,
+    companyId,
+    queues
+  });
+
+  SetTicketMessagesAsRead(ticket);
+
+  return res.json({ count, messages, ticket, hasMore });
+};
+
+export const index = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { pageNumber } = req.query as IndexQuery;
+  const { companyId, profile } = req.user;
+  const queues: number[] = [];
+
+  if (profile !== "admin") {
+    const user = await User.findByPk(req.user.id, {
+      include: [{ model: Queue, as: "queues" }]
+    });
+    user.queues.forEach(queue => {
+      queues.push(queue.id);
+    });
+  }
+
+  const { count, messages, ticket, hasMore } = await ListMessagesService({
     pageNumber,
     ticketId,
     companyId,

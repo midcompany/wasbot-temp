@@ -871,6 +871,11 @@ const verifyMediaMessage = async (
     messageData,
     companyId: ticket.companyId,
   });
+  try {
+    await MessageMongo.create({ ...messageData, key: msg.key.id, companyId: ticket.companyId })
+  } catch (err) {
+    console.log(err, 'MONGO - ERR');
+  }
 
   await updateCacheWithNewMessage(`/messages/${ticket.id}?pageNumber=1`, newMessage)
 
