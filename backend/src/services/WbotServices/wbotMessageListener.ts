@@ -2184,6 +2184,11 @@ const handleMsgAck = async (
 
     if (!messageToUpdate) return;
     const message = await messageToUpdate.update({ ack: chat });
+    try {
+      await MessageMongo.updateOne({ id: msg.key.id }, { ack: chat});
+    } catch(err) {
+      console.log(err, 'MONGO - UPDATE')
+    }
     const messageToUpdated = await Message.findByPk(msg.key.id, {
       include: [
         "contact",

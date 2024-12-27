@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 
 import "./database";
+import "./database/mongodb";
 import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
 import routes from "./routes";
