@@ -20,8 +20,7 @@ import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService";
-import { createCache, getCacheItem } from "../middleware/cacheMid";
-import { redisClient } from "../utils/redis";
+import ListMessagesServiceMongo from "../services/MessageServices/ListMessagesServiceMongo";
 type IndexQuery = {
   pageNumber: string;
 };
@@ -40,7 +39,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const { pageNumber } = req.query as IndexQuery;
   const { companyId, profile } = req.user;
   const queues: number[] = [];
-  const key = req.originalUrl || req.url;
+
   if (profile !== "admin") {
     const user = await User.findByPk(req.user.id, {
       include: [{ model: Queue, as: "queues" }]
@@ -50,16 +49,15 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     });
   }
 
-  const { count, messages, ticket, hasMore } = await ListMessagesService({
+  const { count, messages, ticket, hasMore } = await ListMessagesServiceMongo({
     pageNumber,
     ticketId,
     companyId,
     queues
   });
+
   SetTicketMessagesAsRead(ticket);
-  if (key.split('=').at(-1) == '1') {
-    createCache(`/messages/${ticket.id}?pageNumber=1`, { count, messages, ticket, hasMore })
-  }
+
   return res.json({ count, messages, ticket, hasMore });
 };
 
@@ -72,11 +70,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticket = await ShowTicketService(ticketId, companyId);
 
   SetTicketMessagesAsRead(ticket);
-  if (body == 'clear_c') {
-    const key = req.originalUrl || req.url;
-    await redisClient.del([`/messages/${ticket.id}?pageNumber=1`])
-    return res.send()
-  }
+
   if (medias) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File, index) => {
@@ -126,6 +120,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
     const numberToTest = messageData.number;
     const body = messageData.body;
+
     const companyId = whatsapp.companyId;
 
     const CheckValidNumber = await CheckContactNumber(numberToTest, companyId);
@@ -141,8 +136,6 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
       isGroup: false,
       companyId
     };
-
-
 
     const contact = await CreateOrUpdateContactService(contactData);
 

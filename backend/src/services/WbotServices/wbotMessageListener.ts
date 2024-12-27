@@ -57,6 +57,7 @@ import typebotListener from "../TypebotServices/typebotListener";
 import QueueIntegrations from "../../models/QueueIntegrations";
 import ShowQueueIntegrationService from "../QueueIntegrationServices/ShowQueueIntegrationService";
 import { removeCachePattern, updateCacheWithNewMessage } from "../../middleware/cacheMid";
+import { MessageMongo } from "../../mongoModels/MessageMongo";
 
 const request = require("request");
 
@@ -935,6 +936,13 @@ export const verifyMessage = async (
     lastMessage: body
   });
 
+  try {
+    if (!isEdited) {
+      await MessageMongo.create({ ...messageData, key: msg.key.id, companyId: ticket.companyId })
+    }
+  } catch (err) {
+    console.log(err, 'MONGO - ERR');
+  }
   const message = await CreateMessageService({ messageData, companyId: ticket.companyId });
   await updateCacheWithNewMessage(`/messages/${ticket.id}?pageNumber=1`, message)
 
