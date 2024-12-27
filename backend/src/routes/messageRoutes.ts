@@ -12,7 +12,7 @@ const messageRoutes = Router();
 
 const upload = multer(uploadConfig);
 
-messageRoutes.get("/messages/:ticketId", isAuth, cacheMiddleware, MessageController.index);
+messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
 // messageRoutes.get("/messages/:ticketId", isAuth, cacheMiddleware, MessageController.index);
 
 messageRoutes.post("/messages/:ticketId", isAuth, upload.array("medias"), MessageController.store);
