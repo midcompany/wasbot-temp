@@ -9,6 +9,9 @@ export interface IMessage extends Document {
   fromMe: boolean;
   id: string;
   isDeleted: boolean;
+  contactId: string;
+  quotedMsgId: number;
+  mediaUrl: string,
   isEdited: boolean;
   mediaType: string;
   read: boolean;
@@ -21,6 +24,9 @@ const MessageSchema = new Schema<IMessage>(
   {
     ack: { type: Number, required: false },
     body: { type: String, required: false },
+    mediaUrl: { type: String, required: false },
+    contactId: { type: String, required: false },
+    quotedMsgId: { type: Number, required: false },
     companyId: { type: Number, required: false },
     createdAt: { type: Date, default: Date.now },
     dataJson: { type: String, required: false },
