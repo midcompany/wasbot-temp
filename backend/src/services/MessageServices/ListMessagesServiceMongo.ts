@@ -75,7 +75,7 @@ const ListMessagesServiceMongo = async ({
   // const hasMore = count > offset + messages.length;
 
   return {
-    messages: messagesMongo.reverse(),
+    messages: messagesMongo.reverse().map((m) => ({ ...m, mediaUrl: m?.mediaUrl ? `${process.env.BACKEND_URL}/public/${m.mediaUrl}` : null})),
     ticket,
     count: 35,
     hasMore: false
