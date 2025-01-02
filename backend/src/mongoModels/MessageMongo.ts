@@ -26,9 +26,6 @@ const MessageSchema = new Schema<IMessage>(
     body: { type: String, required: false },
     mediaUrl: {
       type: String,
-      get: function () {
-        return this.mediaUrl ? `${process.env.BACKEND_URL}/public/${this.mediaUrl}` : null;
-      },
       required: false,
     },
     contactId: { type: String, required: false },

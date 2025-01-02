@@ -58,7 +58,8 @@ export const indexMongo = async (req: Request, res: Response): Promise<Response>
 
   SetTicketMessagesAsRead(ticket);
 
-  return res.json({ count, messages, ticket, hasMore });
+  return res.json({ count,
+    messages: messages.map((m) => ({ ...m, mediaUrl: m?.mediaUrl ? `${process.env.BACKEND_URL}/public/${m.mediaUrl}` : null})), ticket, hasMore });
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
