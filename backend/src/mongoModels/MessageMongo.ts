@@ -24,7 +24,13 @@ const MessageSchema = new Schema<IMessage>(
   {
     ack: { type: Number, required: false },
     body: { type: String, required: false },
-    mediaUrl: { type: String, required: false },
+    mediaUrl: {
+      type: String,
+      get: function () {
+        return this.mediaUrl ? `${process.env.BACKEND_URL}/public/${this.mediaUrl}` : null;
+      },
+      required: false,
+    },
     contactId: { type: String, required: false },
     quotedMsgId: { type: Number, required: false },
     companyId: { type: Number, required: false },
