@@ -20,8 +20,8 @@ import Container from "@material-ui/core/Container";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import moment from "moment";
-import logo from "../../assets/logo.png";
-import { toast } from 'react-toastify'; 
+import logo from "../../assets/new-logo.png";
+import { toast } from 'react-toastify';
 import toastError from '../../errors/toastError';
 import 'react-toastify/dist/ReactToastify.css';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
@@ -103,24 +103,24 @@ const ForgetPassword = () => {
   const [user] = useState(initialState);
   const dueDate = moment().add(3, "day").format();
 
-const handleSendEmail = async (values) => {
-  const email = values.email;
-  try {
-    const response = await api.post(
-      `${process.env.REACT_APP_BACKEND_URL}/forgetpassword/${email}`
-    );
-    console.log("API Response:", response.data);
+  const handleSendEmail = async (values) => {
+    const email = values.email;
+    try {
+      const response = await api.post(
+        `${process.env.REACT_APP_BACKEND_URL}/forgetpassword/${email}`
+      );
+      console.log("API Response:", response.data);
 
-    if (response.data.status === 404) {
-      toast.error("Email não encontrado");
-    } else {
-      toast.success(i18n.t("Email enviado com sucesso!"));
+      if (response.data.status === 404) {
+        toast.error("Email não encontrado");
+      } else {
+        toast.success(i18n.t("Email enviado com sucesso!"));
+      }
+    } catch (err) {
+      console.log("API Error:", err);
+      toastError(err);
     }
-  } catch (err) {
-    console.log("API Error:", err);
-    toastError(err);
-  }
-};
+  };
 
   const handleResetPassword = async (values) => {
     const email = values.email;
@@ -147,11 +147,11 @@ const handleSendEmail = async (values) => {
     email: Yup.string().email("Invalid email").required("Required"),
     newPassword: isResetPasswordButtonClicked
       ? Yup.string()
-          .required("Campo obrigatório")
-          .matches(
-            passwordRegex,
-            "Sua senha precisa ter no mínimo 8 caracteres, sendo uma letra maiúscula, uma minúscula e um número."
-          )
+        .required("Campo obrigatório")
+        .matches(
+          passwordRegex,
+          "Sua senha precisa ter no mínimo 8 caracteres, sendo uma letra maiúscula, uma minúscula e um número."
+        )
       : Yup.string(), // Sem validação se não for redefinição de senha
     confirmPassword: Yup.string().when("newPassword", {
       is: (newPassword) => isResetPasswordButtonClicked && newPassword,
